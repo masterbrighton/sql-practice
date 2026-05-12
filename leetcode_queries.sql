@@ -19,3 +19,12 @@ where o.id is null;
 from Weather w1
 left join Weather w2 on w2.recordDate = w1.recordDate + 1
 where w2.temperature > w1.temperature;
+
+--196 Delete Duplicate Emails
+delete from Person
+where id not in (
+    select min(id) from (
+        select * from Person
+    ) as p1 
+    group by email
+);
