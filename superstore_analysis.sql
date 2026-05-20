@@ -31,3 +31,22 @@ select order_date, sales, sum(sales) over (order by order_date, row_id) as runni
 --Rank customers by revenue
 select customer_name, sales, rank() over (order by sales desc) from (
     select customer_name, sum(sales) as sales from superstore group by customer_name );
+
+--Which category is declining?
+with category_trend as 
+(select category, extract(year from order_date) as order_year, sum(sales) as category_sales from superstore group by category, order_year order by order_year)
+select category, order_year, category_sales, lag(category_sales) over (partition by category order by order_year) as lag_sales, 
+case 
+	when category_sales > lag(category_sales) over (partition by category order by order_year) then 'increase'
+	when category_sales < lag(category_sales) over (partition by category order by order_year) then 'decline' 
+	when category_sales = lag(category_sales) over (partition by category order by order_year) then 'no change' 
+	else 'null' 
+end as trend 
+from category_trend;
+
+--Which is the most profitable region?
+select region, sum(sales) as most_profitable_region from superstore group by region order by most_profitable_region desc limit 1;
+
+--What is the monthly growth trend?
+
+--What is the average shipping delay?
