@@ -48,5 +48,13 @@ from category_trend;
 select region, sum(sales) as most_profitable_region from superstore group by region order by most_profitable_region desc limit 1;
 
 --What is the monthly growth trend?
+with monthly_data as 
+(select extract(year from order_date) as order_year, extract(month from order_date) as order_month, sum(sales) as monthly_sales from superstore group by order_year, order_month order by order_year, order_month)
+select order_year, order_month, monthly_sales, lag(monthly_sales) over (order by order_year, order_month) as previous_month_sales,
+round((monthly_sales - lag(monthly_sales) over (order by order_year, order_month)) * 100/
+nullif (lag(monthly_sales) over (order by order_year, order_month), 0), 2) as monthly_growth_percentage
+from monthly_data;
 
 --What is the average shipping delay?
+select avg((ship_date - order_date)) as average_shipping_delay
+from superstore;
